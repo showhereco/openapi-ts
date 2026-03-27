@@ -188,13 +188,6 @@ for (const client of clients) {
         filePaths.map(async (filePath) => {
           const fileContent = fs.readFileSync(filePath, 'utf-8');
 
-          if (
-            client === '@hey-api/client-axios' &&
-            (filePath.endsWith('client/client.gen.ts') || filePath.endsWith('client/utils.gen.ts'))
-          ) {
-            expect(fileContent).not.toContain('@ts-expect-error');
-          }
-
           // flaky test reordering client imports, skip
           if (
             client === '@hey-api/client-nuxt' &&

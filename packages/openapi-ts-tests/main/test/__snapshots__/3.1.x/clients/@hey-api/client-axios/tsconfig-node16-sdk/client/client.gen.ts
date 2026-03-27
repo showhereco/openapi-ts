@@ -29,13 +29,15 @@ export const createClient = (config: Config = {}): Client => {
     instance.defaults = {
       ...instance.defaults,
       ..._config,
-      // @ts-ignore
+      // @ts-expect-error
       headers: mergeHeaders(instance.defaults.headers, _config.headers),
     };
     return getConfig();
   };
 
-  const beforeRequest = async (options: RequestOptions) => {
+  const beforeRequest = async <TData = unknown, Url extends string = string>(
+    options: RequestOptions<TData, boolean, Url>,
+  ) => {
     const opts = {
       ..._config,
       ...options,
@@ -58,14 +60,13 @@ export const createClient = (config: Config = {}): Client => {
       opts.body = opts.bodySerializer(opts.body);
     }
 
-    const url = buildUrl(opts);
+    const url = buildUrl(opts as RequestOptions<unknown, boolean, string>);
 
     return { opts, url };
   };
 
-  // @ts-ignore
+  // @ts-expect-error
   const request: Client['request'] = async (options) => {
-    // @ts-ignore
     const { opts, url } = await beforeRequest(options);
     try {
       // assign Axios here for consistency with fetch
@@ -103,7 +104,7 @@ export const createClient = (config: Config = {}): Client => {
       if (opts.throwOnError) {
         throw e;
       }
-      // @ts-ignore
+      // @ts-expect-error
       e.error = e.response?.data ?? {};
       return e;
     }
@@ -120,7 +121,7 @@ export const createClient = (config: Config = {}): Client => {
       headers: opts.headers as Record<string, string>,
       method,
       serializedBody: getValidRequestBody(opts) as BodyInit | null | undefined,
-      // @ts-ignore
+      // @ts-expect-error
       signal: opts.signal,
       url,
     });
