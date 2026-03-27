@@ -27,7 +27,7 @@ export const createClient = (config: Config = {}): Client => {
     instance.defaults = {
       ...instance.defaults,
       ..._config,
-      // @ts-expect-error
+      // @ts-ignore
       headers: mergeHeaders(instance.defaults.headers, _config.headers),
     };
     return getConfig();
@@ -61,9 +61,9 @@ export const createClient = (config: Config = {}): Client => {
     return { opts, url };
   };
 
-  // @ts-expect-error
+  // @ts-ignore
   const request: Client['request'] = async (options) => {
-    // @ts-expect-error
+    // @ts-ignore
     const { opts, url } = await beforeRequest(options);
     try {
       // assign Axios here for consistency with fetch
@@ -101,7 +101,7 @@ export const createClient = (config: Config = {}): Client => {
       if (opts.throwOnError) {
         throw e;
       }
-      // @ts-expect-error
+      // @ts-ignore
       e.error = e.response?.data ?? {};
       return e;
     }
@@ -118,7 +118,7 @@ export const createClient = (config: Config = {}): Client => {
       headers: opts.headers as Record<string, string>,
       method,
       serializedBody: getValidRequestBody(opts) as BodyInit | null | undefined,
-      // @ts-expect-error
+      // @ts-ignore
       signal: opts.signal,
       url,
     });
