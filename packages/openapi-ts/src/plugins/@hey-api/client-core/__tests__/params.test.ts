@@ -391,6 +391,73 @@ describe('buildClientParams', () => {
     expect(buildClientParams(args, config)).toEqual(params);
   });
 
+  describe('whole-slot aliases', () => {
+    const aliases: FieldsConfig = [
+      {
+        args: [
+          { key: 'payload', map: 'body' },
+          { key: 'metadata', map: 'headers' },
+          { key: 'route', map: 'path' },
+          { key: 'search', map: 'query' },
+        ],
+      },
+    ];
+
+    it('maps whole transport objects', () => {
+      expect(
+        buildClientParams(
+          [
+            {
+              metadata: { authorization: 'token' },
+              payload: { title: 'example' },
+              route: { id: '123' },
+              search: { page: 1 },
+            },
+          ],
+          aliases,
+        ),
+      ).toEqual({
+        body: { title: 'example' },
+        headers: { authorization: 'token' },
+        path: { id: '123' },
+        query: { page: 1 },
+      });
+    });
+
+    it('adds individual fields to aliased transport objects', () => {
+      expect(
+        buildClientParams(
+          [
+            {
+              metadata: { authorization: 'token' },
+              route: { id: '123' },
+              search: { page: 1 },
+            },
+            { format: 'json', trace: 'abc', version: 'v1' },
+          ],
+          [
+            ...aliases,
+            {
+              args: [
+                { in: 'headers', key: 'trace', map: 'x-trace' },
+                { in: 'path', key: 'version' },
+                { in: 'query', key: 'format' },
+              ],
+            },
+          ],
+        ),
+      ).toEqual({
+        headers: { authorization: 'token', 'x-trace': 'abc' },
+        path: { id: '123', version: 'v1' },
+        query: { format: 'json', page: 1 },
+      });
+    });
+
+    it.each([null, false, 0, '', {}, []])('preserves aliased body %j', (body) => {
+      expect(buildClientParams([{ payload: body }], aliases)).toEqual({ body });
+    });
+  });
+
   describe('prototype pollution guards (GHSA-hhx9-57xq-r5rw)', () => {
     const queryFields: FieldsConfig = [{ args: [{ in: 'query', key: 'q' }] }];
 
