@@ -57,7 +57,6 @@ type KeyMap = Map<
       map?: string;
     }
   | {
-      in?: never;
       map: Slot;
     }
 >;
@@ -136,7 +135,7 @@ export function buildClientParams(args: ReadonlyArray<unknown>, fields: FieldsCo
       if (config.key) {
         const field = map.get(config.key)!;
         const name = field.map || config.key;
-        if (field.in) {
+        if ('in' in field) {
           writeSlot(field.in, name, arg);
         }
       } else {
@@ -147,11 +146,12 @@ export function buildClientParams(args: ReadonlyArray<unknown>, fields: FieldsCo
         const field = map.get(key);
 
         if (field) {
-          if (field.in) {
+          if ('in' in field) {
             const name = field.map || key;
             writeSlot(field.in, name, value);
           } else {
-            params[field.map] = value;
+            const slots: Partial<Record<Slot, unknown>> = params;
+            slots[field.map] = value;
           }
         } else {
           const extra = extraPrefixes.find(([prefix]) => key.startsWith(prefix));
